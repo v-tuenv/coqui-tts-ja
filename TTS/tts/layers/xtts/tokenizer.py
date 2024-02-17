@@ -435,6 +435,8 @@ _symbols_multilingual = {
 
 
 def expand_symbols_multilingual(text, lang="en"):
+    if lang not in _symbols_multilingual:
+        lang='en'
     for regex, replacement in _symbols_multilingual[lang]:
         text = re.sub(regex, replacement, text)
         text = text.replace("  ", " ")  # Ensure there are no double spaces
