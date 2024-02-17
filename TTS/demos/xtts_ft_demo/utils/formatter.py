@@ -81,6 +81,9 @@ def format_audio_list(audio_files, target_language="en", out_path=None, buffer=0
         words_list = []
         for _, segment in enumerate(segments):
             words = list(segment.words)
+            for k in range(len(words)-1):
+                words[k].is_end=False 
+            words[-1].is_end=True
             words_list.extend(words)
 
         # process each word
@@ -101,7 +104,7 @@ def format_audio_list(audio_files, target_language="en", out_path=None, buffer=0
             else:
                 sentence += word.word
 
-            if word.word[-1] in ["!", ".", "?"]:
+            if word.word[-1] in ["!", ".", "?"] or word.is_end:
                 sentence = sentence[1:]
                 # Expand number and abbreviations plus normalization
                 sentence = multilingual_cleaners(sentence, target_language)
