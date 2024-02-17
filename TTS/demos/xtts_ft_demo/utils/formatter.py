@@ -53,7 +53,7 @@ def format_audio_list(audio_files, target_language="en", out_path=None, buffer=0
     device = "cuda" if torch.cuda.is_available() else "cpu" 
 
     print("Loading Whisper Model!")
-    asr_model = WhisperModel("large-v2", device=device, compute_type="float16")
+    asr_model = WhisperModel("large-v2", device=device, compute_type="float32")
 
     metadata = {"audio_file": [], "text": [], "speaker_name": []}
 
@@ -79,11 +79,13 @@ def format_audio_list(audio_files, target_language="en", out_path=None, buffer=0
         first_word = True
         # added all segments words in a unique list
         words_list = []
+        word_idx_is_end = []
         for _, segment in enumerate(segments):
             words = list(segment.words)
             for k in range(len(words)-1):
-                words[k].is_end=False 
-            words[-1].is_end=True
+                # words[k].is_end=False 
+                word_idx_is_end.append(False)
+            word_idx_is_end.append(True)
             words_list.extend(words)
 
         # process each word
@@ -104,7 +106,7 @@ def format_audio_list(audio_files, target_language="en", out_path=None, buffer=0
             else:
                 sentence += word.word
 
-            if word.word[-1] in ["!", ".", "?"] or word.is_end:
+            if word.word[-1] in ["!", ".", "?"] or word_idx_is_end[word_idx]:
                 sentence = sentence[1:]
                 # Expand number and abbreviations plus normalization
                 sentence = multilingual_cleaners(sentence, target_language)
